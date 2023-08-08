@@ -550,13 +550,14 @@ class OidcDeviceAuthorization(_OidcBase):
             self._get_device_authorization_endpoint(session)
         op_response = session.post(device_authz_endpoint,
                                    requests_auth=client_auth,
+                                   data={"client_id": self.client_id, "scope": self.scope},
                                    headers=self.HEADER_X_FORM,
                                    authenticated=False)
 
         self.expires_in = int(op_response.json()["expires_in"])
         self.timeout = time.time() + self.expires_in
         self.device_code = op_response.json()["device_code"]
-        self.interval = int(op_response.json()["interval"])
+        self.interval = int(op_response.json().get("interval", 10))
         self.user_code = op_response.json()["user_code"]
         self.verification_uri = op_response.json()["verification_uri"]
         self.verification_uri_complete = \
